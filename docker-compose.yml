@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    working_dir: /app
+    ports:
+      - "11011:11011"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=STTDB
+
+    command: sh -c "goose -dir ./db/migration postgres \"postgres://postgres:1234@db:5432/STTDB?sslmode=disable\" up && go run cmd/sso/main.go --config=/app/config/local.yaml"
+    
+  db:
+    image: postgres:13.3
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=STTDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/migration:/docker-entrypoint-initdb.d
+
+  nginx:
+    image: nginx:latest
+    container_name: STTNginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ../../nginx:/etc/nginx/conf.d
+
+volumes:
+  postgres_data:

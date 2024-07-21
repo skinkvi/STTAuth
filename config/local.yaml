@@ -1,0 +1,8 @@
+env: "local"
+storage:
+  postgres:
+    url: "postgres://postgres:1234@db:5432/STTDB?sslmode=disable"
+token_ttl: 1h
+grpc:
+  port: 11011
+  timeout: 10h

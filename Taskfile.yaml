@@ -1,0 +1,20 @@
+version: "3"
+
+tasks:
+  runapp:
+    desc: "Run app"
+    cmds:
+      - task migrate
+      - go run cmd/sso/main.go --config=./config/local.yaml
+
+  migrate:
+    aliases:
+      - m
+    desc: "Run db migrations"
+    cmds:
+      - goose postgres "postgres://postgres:1234@db:5432/STTDB?sslmode=disable" up
+
+  reset:
+    desc: "Reset databases"
+    cmds:
+      - goose postgres "postgres://postgres:1234@db:5432/STTDB?sslmode=disable" down

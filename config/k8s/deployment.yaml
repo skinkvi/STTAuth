@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-for-stt-development
+spec:
+  selector:
+    matchLabels:
+      app: auth-for-stt
+  replicas: 1
+  template: 
+    metadata:
+      labels:
+        app: auth-for-stt
+    spec:
+      containers:
+        - name: auth-for-stt-container
+          image: auth-for-stt-container
+          ports:
+            - protocol: TCP 
+              containerPort: 11011
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "64Mi"
+              cpu: "250m"

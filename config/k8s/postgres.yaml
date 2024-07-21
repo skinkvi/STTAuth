@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13.3
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: ""
+        - name: POSTGRES_DB
+          value: "STTDB"
+        ports:
+        - containerPort: 5433
+          protocol: TCP 
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: migrations
+          mountPath: /docker-entrypoint-initdb.d
+      initContainers:
+      - name: init-db
+        image: postgres:latest
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: ""
+        - name: POSTGRES_DB
+          value: "STTDB"
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: migrations
+          mountPath: /docker-entrypoint-initdb.d
+        command: ["bash", "-c", "for f in /docker-entrypoint-initdb.d/*; do psql -U postgres -d STTDB -f \"$$f\"; done"]
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: standard
+  - metadata:
+      name: migrations
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 600Mi
+      storageClassName: standard
