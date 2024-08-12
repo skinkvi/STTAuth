@@ -37,6 +37,10 @@ func (a *App) MustRun() {
 	}
 }
 
+func (a *App) SetServer(server *grpc.Server) {
+	a.gRPCServer = server
+}
+
 func (a *App) Run() error {
 	const op = "grpcapp.Run" // типо operation
 

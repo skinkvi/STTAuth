@@ -8,6 +8,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const (
@@ -31,10 +34,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Настройка сервера gRPC с TLS
+	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
+	if err != nil {
+		log.Error("Failed to generate credentials", slog.String("err", err.Error()))
+		os.Exit(1)
+	}
+
+	grpcServer := grpc.NewServer(grpc.Creds(creds))
+	application.GRPCSrv.SetServer(grpcServer)
+
 	go application.GRPCSrv.MustRun()
 
 	// Graceful shutdown
-
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
